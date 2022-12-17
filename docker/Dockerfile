@@ -139,7 +139,7 @@ RUN pip3 install biopython
 
 RUN pip3 install --upgrade ete3
 
-RUN git clone https://github.com/gennaBnh/DGINN && cd DGINN && git checkout inDev2
+RUN git clone https://github.com/gennaBnh/DGINN && cd DGINN
 ENV PATH /opt/DGINN/:$PATH
 ENV PYTHONPATH /opt/DGINN/:$PYTHONPATH
 
