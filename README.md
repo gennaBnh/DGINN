@@ -18,7 +18,7 @@ The version of DGINN used in the paper refers to [commit 5db0253](https://github
 and can be fetched through:
 ```{sh}
 git init
-git remote add origin https://github.com/leapicard/DGINN
+git remote add origin https://github.com/gennaBnh/DGINN
 git fetch --depth 1 origin 5db02532408afcafad50a0b70dcf247ab4800492
 git checkout FETCH_HEAD
 ```
@@ -48,6 +48,53 @@ startingstep can take one of these values :
 - "orf"
 - "align"
 - "tree"
+
+### Starting the pipeline using Snakemake :
+
+#### From command line, without the Docker container :
+To start the Snakemake DGINN pipeline from the command line, you first need to install all the pipeline's dependencies by running the **install_dep.sh** script.
+
+After modifying the config.json file, as specified above, navigate to the workflow directory of the DGINN repository and run the following command :
+
+```sh
+snakemake -c1 "results/<Outputfile>"
+```
+
+The Outputfile's name follows this pattern :
+\<step_name\>\_input\_\<anyname\>.<extension\>
+
+The step name here would be the name of the step directly after the one that is executed last. Replace \<anyname> by the name of your inputfile.
+
+Here are examples of what target to give snakemake if your input file is named "ex_CCDS.fasta"
+|Last step that you want to run              | outputfile to give Snakemake         |
+|-------------------|----------------------------------------------|
+| blast             |         accessions_input_ex_CCDS.tsv         |
+| accessions        | fasta_input_ex_CCDS.txt                      |
+| fasta             | orf_input_ex_CCDS.fasta                      |
+| orf               | align_input_ex_CCDS.fasta                    |
+| alignment         | tree_input_ex_CCDS.fasta                     |
+| tree              |          Work in progess                     |
+| duplication       | Work in progress                             |
+| recombination     | Work in progress                             |
+| positiveSelection | Work in progress                             |
+
+
+For example, if you want to run the pipeline up to the tree alignment step, from a file named **ex_CCDS.fasta**, you would type the command :
+
+```
+snakemake -c1 "results/tree_input_ex_CCDS.fasta"
+```
+#### With the docker container :
+To run the pipeline from the docker container, the main principle is the same, with a few differences :
+
+run the command : 
+
+```sh
+docker run --rm -u $(id -u $USER):$(id -u $USER) -e HOME=. -v $PWD:$PWD -w $PWD leapicard/dginn -c1 "results/<Outputfile>"
+```
+
+And replace \<Outputfile> by one of the filenames from the table above.
+
 # Overview
 
 
