@@ -1,4 +1,4 @@
-name: snakemake
+name: smk-standalone
 channels:
   - bioconda
   - conda-forge
