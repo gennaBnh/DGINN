@@ -31,16 +31,16 @@ laurent.gueguen [at] univ-lyon1.fr or lucie.etienne [at] ens-lyon.fr.
 
 ## Dependencies :
 
-### Singularity
+### a/ Singularity
 To use the Snakemake version of the pipeline, you will first need to install singularity.
 
 To do so, follow [this tutorial](https://github.com/sylabs/singularity/blob/main/INSTALL.md)
-### Snakemake
+### b/ Snakemake
 To install Snakemake, you will first need to install conda. [Here is the guide for that.](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html)
 
 The snakemake installation is detailed [here](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html)
 
-### Java
+### c/ Java
 The use of the MACSE codon aligner tool with this pipeline requires that you have a java sdk installed.
 
 To install one, type this command :
