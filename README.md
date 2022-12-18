@@ -27,7 +27,7 @@ The docker is available for both the paper version and the current version of DG
 Any questions or suggestions about the program can be addressed to lea.picard [at] ens-lyon.fr,
 laurent.gueguen [at] univ-lyon1.fr or lucie.etienne [at] ens-lyon.fr.
 
-# Snakemake use :
+# Installation :
 
 ## Dependencies :
 
