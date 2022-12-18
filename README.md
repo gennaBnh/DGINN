@@ -100,61 +100,35 @@ To run the pipeline from the duplication step you must filled the following para
 "step" : "duplication",
 "duplication" : true
 ```
-
+**Some example config files are available in the examples folder of the repository**
 
 ## STEP 2 : Run the pipeline 
+
+**Before running the pipeline, you need to change the configfile path in the Snakefile depending of which one to use**
+
+There are two lines where you need to specify the right path, here is an example of what that would look like if you wanted to use the configfile *examples/config_exemple.json*
+```
+line2: config_path = "examples/config_exemple.json"
+line3: configfile: "examples/config_exemple.json"
+```
+
 ### Starting the pipeline using Snakemake :
 
 To run the Snakemake DGINN pipeline, simply type : 
 ```sh
-snakemake -c1 -p --use-singularity --config-file <path_to_config_file>
+snakemake -c1 -p --use-singularity
 ```
 You can replace -c1 by -cx where x is the number of cores you want the pipeline to use.
 
 ### From command line, without the Docker container :
-To start the Snakemake DGINN pipeline from the command line, you first need to install all the pipeline's dependencies by running the **install_dep.sh** script.
+To start the Snakemake DGINN pipeline from the command line, you first need to install all the pipeline's dependencies : [EMBOSS:6.6](http://en.bio-soft.net/format/emboss.html), [PhyML 3.0](https://github.com/stephaneguindon/phyml), [PRANK v.170427](http://wasabiapp.org/software/prank/prank_installation/), [Treerecs v1.0](https://gitlab.inria.fr/Phylophile/Treerecs), [HYPHY 2.3](http://www.hyphy.org/installation/), [Bio++ v.3](https://github.com/BioPP)
+- Python (>3.5) and packages: Biopython, ete3, collections, logging, shlex, os, numpy, scipy, requests, pandas, statistics, time, re, argparse
 
 After modifying the config.json file, as specified above, navigate to the workflow directory of the DGINN repository and run the following command :
 
 ```sh
-snakemake -c1 "results/<Outputfile>"
+snakemake -c1 -p
 ```
-
-The Outputfile's name follows this pattern :
-\<step_name\>\_input\_\<anyname\>.<extension\>
-
-The step name here would be the name of the step directly after the one that is executed last. Replace \<anyname> by the name of your inputfile.
-
-Here are examples of what target to give snakemake if your input file is named "ex_CCDS.fasta"
-|Last step that you want to run              | outputfile to give Snakemake         |
-|-------------------|----------------------------------------------|
-| blast             |         accessions_input_ex_CCDS.tsv         |
-| accessions        | fasta_input_ex_CCDS.txt                      |
-| fasta             | orf_input_ex_CCDS.fasta                      |
-| orf               | align_input_ex_CCDS.fasta                    |
-| alignment         | tree_input_ex_CCDS.fasta                     |
-| tree              |          Work in progess                     |
-| duplication       | Work in progress                             |
-| recombination     | Work in progress                             |
-| positiveSelection | Work in progress                             |
-
-
-For example, if you want to run the pipeline up to the tree alignment step, from a file named **ex_CCDS.fasta**, you would type the command :
-
-```
-snakemake -c1 "results/tree_input_ex_CCDS.fasta"
-```
-### With the docker container :
-To run the pipeline from the docker container, the main principle is the same, with a few differences :
-
-run the command : 
-
-```sh
-docker run --rm -u $(id -u $USER):$(id -u $USER) -e HOME=. -v $PWD:$PWD -w $PWD leapicard/dginn -c1 "results/<Outputfile>"
-```
-
-And replace \<Outputfile> by one of the filenames from the table above.
-
 # Overview
 
 
