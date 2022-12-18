@@ -27,7 +27,7 @@ The docker is available for both the paper version and the current version of DG
 Any questions or suggestions about the program can be addressed to lea.picard [at] ens-lyon.fr,
 laurent.gueguen [at] univ-lyon1.fr or lucie.etienne [at] ens-lyon.fr.
 
-# SNAKEMAKE USE :
+# Snakemake use :
 
 ## Dependencies :
 
@@ -49,9 +49,9 @@ To install one, type this command :
 sudo apt install default-sdk
 ```
 
-### How to run the pipeline :
+# How to run the pipeline :
 
-#### STEP 1 : Fill in the config file 
+## STEP 1 : Fill in the config file 
   DGINN uses a config file in a json format to pass all the necessary arguments for launching the pipeline.
   The file is available in the config/ folder. Two example files are provided in the examples directory:
   1. one performing steps 1-7 (see Overview) from the CDS of the gene of interest to the detection of recombination (config_exemple.json)
@@ -62,13 +62,13 @@ This is the recommended usage for DGINN, so that analyses for positive selection
 Please be aware that fasta sequence name **and** queryName must follow the format speSpe_GENE_Id (ex: homSap_MX1_CCDS13673,
 macMul_APOBEC3G_NM_001198693).
 
-##### a/ The parameters 
+### a/ The parameters 
 The parameters of the "parameters" dictionnary can be modified not the data ones. A description of all the parameters is available in the config.schema.yaml file in the config/ folder.
 
-##### b/ Required parameters 
+### b/ Required parameters 
 The parameters "infile" must be filled otherwise the pipeline won't run. The infile necessary to run the pipeline depends on the step from which you would like the analysis to start. Please refer to c/ The Step parameter for names and necessary files.
 
-#### c/ The Step parameter
+### c/ The Step parameter
 DGINN realises 9 different steps. It will by default start frome the blast step but the pipeline can be start from different steps. Here's a resume on the steps available and the input files required to run them. 
 
 
@@ -90,10 +90,10 @@ File order must be respected and follow the one indicated in this table.
 Though codon alignments are not technically necessary for the phyml, duplication and recombination steps, they are for positiveSelection.
 Thus, starting at steps upstream of positiveSelection with non codon alignments will probably lead to failure at the positiveSelection step. 
 
-#### d/ The boolean steps 
+### d/ The boolean steps 
 If you want to realize one of the 3 last step, make sur to set them at true in the config file.
 
-#### e/ Exemple
+### e/ Exemple
 To run the pipeline from the duplication step you must filled the following parameters in the config file as follow :
 ```
 "infile" : "<filename>.<fasta>,<filename>.<tree>",
@@ -102,8 +102,8 @@ To run the pipeline from the duplication step you must filled the following para
 ```
 
 
-#### STEP 2 : Run the pipeline 
-##### Starting the pipeline using Snakemake :
+## STEP 2 : Run the pipeline 
+### Starting the pipeline using Snakemake :
 
 To run the Snakemake DGINN pipeline, simply type : 
 ```sh
@@ -111,7 +111,7 @@ snakemake -c1 -p --use-singularity --config-file <path_to_config_file>
 ```
 You can replace -c1 by -cx where x is the number of cores you want the pipeline to use.
 
-##### From command line, without the Docker container :
+### From command line, without the Docker container :
 To start the Snakemake DGINN pipeline from the command line, you first need to install all the pipeline's dependencies by running the **install_dep.sh** script.
 
 After modifying the config.json file, as specified above, navigate to the workflow directory of the DGINN repository and run the following command :
@@ -144,7 +144,7 @@ For example, if you want to run the pipeline up to the tree alignment step, from
 ```
 snakemake -c1 "results/tree_input_ex_CCDS.fasta"
 ```
-#### With the docker container :
+### With the docker container :
 To run the pipeline from the docker container, the main principle is the same, with a few differences :
 
 run the command : 
