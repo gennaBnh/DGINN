@@ -5,9 +5,28 @@ from Bio.Blast import NCBIWWW, NCBIXML
 from Bio import SearchIO, SeqIO
 from time import sleep
 import json
-from AnalysisFunc import cmd
 import loadFile
 
+def cmd(commandLine, choice, verbose = False):
+	"""
+	Function executing a command line in a bash terminal.
+	@param1 commandLine: String corresponding to a bash command line
+	@param2 choice: Boolean determining whether the command is executed within the shell 
+	"""
+	if verbose:
+          stdout=None
+	else:
+          stdout=subprocess.PIPE
+
+	lCmd = shlex.split(commandLine)
+	try:
+	  run = subprocess.call(lCmd, 
+			        shell=choice,
+                          stdout=stdout,
+			        stderr=subprocess.PIPE)
+	except subprocess.CalledProcessError as err:
+	  sys.stderr.write(str(err))
+	
 def parseBlast(blastRes):
 
 	with open(blastRes, "r") as blast:
