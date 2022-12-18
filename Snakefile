@@ -1,7 +1,7 @@
 from snakemake.utils import min_version, validate
 config_path = "examples/config_exemple.json"
 min_version("6.15.1")
-
+container: "docker://laugueguen/dginn"
 configfile: "examples/config_exemple.json"
 validate(config, "config/config.schema.yaml")
 
