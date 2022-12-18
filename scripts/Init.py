@@ -194,7 +194,7 @@ if __name__ == "__main__" :
 	json_dict["parameters"] = parameters_complete
 	json_dict["data"] = data_filled
 	#json_dict_updated = json.dumps(json_dict)
-
+	json_dict["data"]["sptree"] = json_dict["parameters"]["sptree"]
 	with open(sys.argv[1], 'w') as json_out :
 		json.dump(json_dict, json_out, indent="")
 	

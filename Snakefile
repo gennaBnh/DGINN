@@ -1,8 +1,8 @@
 from snakemake.utils import min_version, validate
-
+config_path = "examples/config_exemple.json"
 min_version("6.15.1")
 
-configfile: "config/config.json"
+configfile: "examples/config_exemple.json"
 validate(config, "config/config.schema.yaml")
 
 dir = config["data"]["o"]
@@ -22,7 +22,7 @@ rule all:
 
 rule init:
     input: 
-        config = "config/config.json"
+        config = "examples/config_exemple.json"
     output:
         infile = dir+config["parameters"]["step"]+"_input_"+[config["parameters"]["infile"]][0].split("/")[1]
     message: "\nInitializing pipeline, starting at step "+config["parameters"]["step"]+"."
@@ -35,7 +35,7 @@ rule blast:
     output:
         tsvfile = dir+"accessions_input_{samples}.tsv"
     params:
-        config = "config/config.json"
+        config = config_path
     message: "\nStarting BLAST alignment on file {input.infile}, writing output in file {output.tsvfile}"
     shell:
         "python3 scripts/Blast.py {params.config} {output.tsvfile}"
@@ -46,7 +46,7 @@ rule extract:
     output:
         accns = dir+"fasta_input_{samples}.txt" 
     params:
-        config = "config/config.json"
+        config = config_path
     message: "\nStarting Accessions search from file {input.blastres}, writing accessions in file {output.accns}"
     shell:
         "python3 scripts/Extract.py {params.config} {input.blastres} {output.accns}"
@@ -57,7 +57,7 @@ rule fasta_res:
     output:
         seq = dir+"orf_input_{samples}.fasta"
     params:
-        config = "config/config.json"
+        config = config_path
     message: "\nStarting the retreival of FASTA sequences from accessions file {input.accns}, writing sequences in file {output.seq}"
     shell:
         "python3 scripts/fastaRes.py {params.config} {input.accns} {output.seq}"
@@ -69,7 +69,7 @@ rule get_orf:
         res = dir+"{samples}_allORFs.fasta",
         res_longest = dir+"align_input_{samples}.fasta"
     params:
-        config = "config/config.json"
+        config = config_path
     message: "\nStarting ORFs search in FASTA sequences from file {input.seqfile}.\nWriting longest ORFs found in file {output.res_longest}"
     shell:
         "python3 scripts/ORF.py {params.config} {output.res} {output.res_longest}"
@@ -80,7 +80,7 @@ rule align_mafft:
     output:
         out_covAln = dir+"{samples}_mafft.fasta"
     params:
-        config = "config/config.json",
+        config = config_path,
         out_mafft = dir+"{samples}_ORFs_al_mafft.fasta"
     message: "\nStarting mafft nucleotide alignment. Aligning sequences from file {input.lgst_ORFs}, writing alignment in file {output.out_covAln}"
     run:
@@ -93,7 +93,7 @@ rule first_align_codon:
     output:
         out_clusterIso = dir+"{samples}_clustiso_first.fasta" if len(config["parameters"]["codon_aligner"]) == 2 else dir+"{samples}_clustiso.fasta"
     params:
-        config = "config/config.json",
+        config = config_path,
         extension = config["parameters"]["codon_aligner"][0],
         out_codon_param = dir+"{samples}_alcodon",
         macse_param = "-prog refineAlignment -align" if config["parameters"]["align_nt"] else "-prog alignSequences -seq"
@@ -117,7 +117,7 @@ rule second_align_codon:
     output:
         out_clusterIso_2 = dir+"tree_input_{samples}.fasta"
     params:
-        config = "config/config.json",
+        config = config_path,
         extension = config["parameters"]["codon_aligner"][1] if len(config["parameters"]["codon_aligner"]) == 2 else config["parameters"]["codon_aligner"][0],
         out_codon_param = dir+"{samples}_alcodon",
         macse_param = "-prog refineAlignment -align" if config["parameters"]["align_nt"] else "-prog alignSequences -seq"
@@ -126,7 +126,7 @@ rule second_align_codon:
     run:
         if len(config["parameters"]["codon_aligner"]) == 1 :
             shell("mv results/{wildcards.samples}_clustiso.fasta results/tree_input_{wildcards.samples}.fasta") 
-
+            shell("python3 scripts/clusterIso.py {params.config} {output.out_clusterIso_2} {params.out_codon_param}_{params.extension}.fas")
         elif len(config["parameters"]["codon_aligner"]) == 2 :
 
             if config["parameters"]["codon_aligner"][1] == "prank" :
@@ -147,7 +147,7 @@ rule tree:
         infile = dir+"tree_input_"+filename+".fasta" 
     params:
         fonction = "phyMLTree",
-        config = "config/config.json",
+        config = config_path,
     output:
         phymlfile = temp(dir+filename+"_filtered2.phylip_phyml_tree.txt")
     message: "\nStarting Tree building, writing output in file {output.phymlfile}" 
@@ -161,7 +161,7 @@ rule detection:
     params:
         duplication_function = "checkPhyMLTree",
         recombination_function = "gardRecomb",
-        config = "config/config.json",
+        config = config_path,
         filename = filename
     output:
         final_ouput = temp(endfile)

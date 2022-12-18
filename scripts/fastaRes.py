@@ -169,6 +169,8 @@ def fastaCreation(data_dict, remote, apiKey, step, treerecs, outputfile):
 	data_dict["seqFile"] = firstFasta
 
 	if treerecs:
+		
+		print(f"spTree : {data_dict}")
 		sptree_tmp, treerecs = tree.treeCheck(data_dict["sptree"], firstFasta, treerecs)
 		data_dict["sptree"] = sptree_tmp
 	if treerecs:
@@ -188,6 +190,7 @@ if __name__ == "__main__" :
 
 	if params_dict["step"] == "fasta":
 		data_dict = loadFile.getSeqEntry(data_dict)
+	data_dict["sptree"] = params_dict["sptree"]
 	data_dict = fastaCreation(data_dict, params_dict["remote"], params_dict["APIKey"], params_dict["step"], params_dict["duplication"],sys.argv[3])
 
 	config_dict["data"] = data_dict

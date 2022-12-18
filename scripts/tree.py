@@ -16,6 +16,7 @@ def getLeaves(path):
 	@param path: path of a tree file
 	@return lTreeData: list of species
 	"""
+	
 	tree = ete3.Tree(path)
 	lGene = tree.get_leaf_names()
 
@@ -503,7 +504,7 @@ def treeTreatment(data, dAlnTree, nbSp, phymlOpt, endFile):
 		
 	if len(lFastaFile) > 0:
 		for orthoGp in data["duplication"]:
-			aln = Analysis.runPrank(orthoGp, data.geneName, data.o) 
+			aln = Analysis.runPrank(orthoGp, data["o"]) 
 			tree = Analysis.runPhyML(aln, phymlOpt, data["o"])
 			dAlnTree2[aln] = tree+"_phyml_tree.txt" #à remettre
 	logger.info(str(dAlnTree2))

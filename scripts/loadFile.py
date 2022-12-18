@@ -33,7 +33,7 @@ def filterData(sptree, filePath, o):
 	@param3 o: Path of a directory
 	@return path: Path of a file
 	"""
-	
+
 	corsg = tree.assocFile(sptree, filePath, o)
 
 	path = tree.supData(filePath, corsg, o)
@@ -124,14 +124,14 @@ def spTreeCheck(data, firstStep, treeOption):
 		if data["sptree"]!="":
 			aln2, corSG = filterData(data["sptree"], aln, data["o"])
 
-		if firstStep == "orf":
-			data["seqFile"]=aln2
-		elif firstStep == "alignment":
-			data["ORFs"]=aln2
-		elif firstStep == "tree" or firstStep=="duplication":
-			data["aln"]=aln2
+			if firstStep == "orf":
+				data["seqFile"]=aln2
+			elif firstStep == "alignment":
+				data["ORFs"]=aln2
+			elif firstStep == "tree" or firstStep=="duplication":
+				data["aln"]=aln2
 			
-		data["cor"] = corSG
+			data["cor"] = corSG
 
 
 def getSeqEntry(Data):
