@@ -1,8 +1,8 @@
 FROM ubuntu:latest as base
 MAINTAINER Lea Picard lea.picard@gmail.com
 
-ENV DEBIAN_FRONTEND noninteractive
-
+#ENV DEBIAN_FRONTEND noninteractive
+COPY ./smk.yaml .
 RUN apt-get  clean && apt-get update && apt-get install -y apt-utils
 
 RUN TZ="Europe/Paris" apt-get -y install tzdata
@@ -17,8 +17,18 @@ RUN apt-get -y install build-essential \
 	libssl-dev \
 	openmpi-bin \
 	libopenmpi-dev \
-        libeigen3-dev
-        
+    libeigen3-dev \
+	wget
+
+## Install conda
+
+ENV CONDA_DIR /opt/conda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+/bin/bash ~/miniconda.sh -b -p /opt/conda
+ENV PATH=$CONDA_DIR/bin:$PATH
+RUN conda env create -f smk.yaml
+
+
 ## Install most recent version of cMake
 RUN git clone https://github.com/Kitware/CMake && cd CMake && ./bootstrap && make && make install
 
@@ -131,19 +141,19 @@ FROM base
 WORKDIR /opt/
 
 ## Install python3, necessary packages and DGINN
-RUN apt-get install -y python3-pip
-RUN pip3 install --upgrade numpy \
-	scipy \
-	pandas \
-	requests \
-	setuptools \
-	pyqt5==5.14 \
-	six \
-	lxml
+# RUN apt-get install -y python3-pip
+# RUN pip3 install --upgrade numpy \
+# 	scipy \
+# 	pandas \
+# 	requests \
+# 	setuptools \
+# 	pyqt5==5.14 \
+# 	six \
+# 	lxml
 
-RUN pip3 install biopython
+# RUN pip3 install biopython
 
-RUN pip3 install --upgrade ete3
+# RUN pip3 install --upgrade ete3
 
 RUN git clone https://github.com/gennaBnh/DGINN && cd DGINN
 ENV PATH /opt/DGINN/:$PATH
@@ -183,10 +193,9 @@ COPY --from=paml /opt/paml/src/codeml /usr/local/bin/
 
 RUN apt-get install -y python3-biopython
 
-RUN apt-get update -y && \
-    apt-get install -y snakemake
+# RUN apt-get update -y && \
+#     apt-get install -y snakemake
 
-#WORKDIR /opt/DGINN/workflow/
+WORKDIR /opt/DGINN/
 
-ENTRYPOINT [ "Snakefile" ]
-CMD ["-c1 -p"]
+ENTRYPOINT [ "conda", "run", "-n", "snakemake", "snakemake" ]
