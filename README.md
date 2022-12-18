@@ -27,31 +27,91 @@ The docker is available for both the paper version and the current version of DG
 Any questions or suggestions about the program can be addressed to lea.picard [at] ens-lyon.fr,
 laurent.gueguen [at] univ-lyon1.fr or lucie.etienne [at] ens-lyon.fr.
 
-# SNAKEMAKE USE :
-You can launch the pipeline from any step, if you use the name format : \<anyname>.\<extension>
+# Installation :
 
-See 3/ Entry steps to find the right extension for your step.
+## Dependencies :
 
-You will also need to specify the name of your file in the config file
+### a/ Singularity
+To use the Snakemake version of the pipeline, you will first need to install singularity.
 
-As well as the starting step's name.
+To do so, follow [this tutorial](https://github.com/sylabs/singularity/blob/main/INSTALL.md)
+### b/ Snakemake
+To install Snakemake, you will first need to install conda. [Here is the guide for that.](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html)
+
+The snakemake installation is detailed [here](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html)
+
+### c/ Java
+The use of the MACSE codon aligner tool with this pipeline requires that you have a java sdk installed.
+
+To install one, type this command :
+
+```sh
+sudo apt install default-sdk
 ```
-"infile" : "<anyname>.<extension>"
-"step" : "startingstep"
+
+# How to run the pipeline :
+
+## STEP 1 : Fill in the config file 
+  DGINN uses a config file in a json format to pass all the necessary arguments for launching the pipeline.
+  The file is available in the config/ folder. Two example files are provided in the examples directory:
+  1. one performing steps 1-7 (see Overview) from the CDS of the gene of interest to the detection of recombination (config_exemple.json)
+  2. one performing step 8 for the detection of positive selection (config_exemple_possel.json)
+
+This is the recommended usage for DGINN, so that analyses for positive selection can be parallelized over all alignments instead of doing them sequentially.
+
+Please be aware that fasta sequence name **and** queryName must follow the format speSpe_GENE_Id (ex: homSap_MX1_CCDS13673,
+macMul_APOBEC3G_NM_001198693).
+
+### a/ The parameters 
+The parameters of the "parameters" dictionnary can be modified not the data ones. A description of all the parameters is available in the config.schema.yaml file in the config/ folder.
+
+### b/ Required parameters 
+The parameters "infile" must be filled otherwise the pipeline won't run. The infile necessary to run the pipeline depends on the step from which you would like the analysis to start. Please refer to c/ The Step parameter for names and necessary files.
+
+### c/ The Step parameter
+DGINN realises 9 different steps. It will by default start frome the blast step but the pipeline can be start from different steps. Here's a resume on the steps available and the input files required to run them. 
+
+
+| Step              | Necessary file\(s\)                          | Format                     |
+|-------------------|----------------------------------------------|----------------------------|
+| blast             | CDS of the gene of interest                  | Fasta                      |
+| accessions        | List of blast results                        | NCBI tabulated format (tsv)|
+| fasta             | List of accession identifiers \(one/line\)   | Txt                        |
+| orf               | mRNA sequences of orthologs                  | Fasta                      |
+| align         | CDS sequences of orthologs                   | Fasta                      |
+| tree              | \(codon\) alignment of orthologs             | Fasta                      |
+| duplication       | \(codon\) alignment, gene tree               | Fasta, newick              |
+| recombination     | \(codon\) alignment                          | Fasta                      |
+| positiveSelection | codon alignment, gene tree                   | Fasta, gene tree           |
+
+
+File order must be respected and follow the one indicated in this table. 
+
+Though codon alignments are not technically necessary for the phyml, duplication and recombination steps, they are for positiveSelection.
+Thus, starting at steps upstream of positiveSelection with non codon alignments will probably lead to failure at the positiveSelection step. 
+
+### d/ The boolean steps 
+If you want to realize one of the 3 last step, make sur to set them at true in the config file.
+
+### e/ Exemple
+To run the pipeline from the duplication step you must filled the following parameters in the config file as follow :
+```
+"infile" : "<filename>.<fasta>,<filename>.<tree>",
+"step" : "duplication",
+"duplication" : true
 ```
 
-startingstep can take one of these values :
 
-- "blast"
-- "accessions"
-- "fasta"
-- "orf"
-- "align"
-- "tree"
-
+## STEP 2 : Run the pipeline 
 ### Starting the pipeline using Snakemake :
 
-#### From command line, without the Docker container :
+To run the Snakemake DGINN pipeline, simply type : 
+```sh
+snakemake -c1 -p --use-singularity --config-file <path_to_config_file>
+```
+You can replace -c1 by -cx where x is the number of cores you want the pipeline to use.
+
+### From command line, without the Docker container :
 To start the Snakemake DGINN pipeline from the command line, you first need to install all the pipeline's dependencies by running the **install_dep.sh** script.
 
 After modifying the config.json file, as specified above, navigate to the workflow directory of the DGINN repository and run the following command :
@@ -84,7 +144,7 @@ For example, if you want to run the pipeline up to the tree alignment step, from
 ```
 snakemake -c1 "results/tree_input_ex_CCDS.fasta"
 ```
-#### With the docker container :
+### With the docker container :
 To run the pipeline from the docker container, the main principle is the same, with a few differences :
 
 run the command : 
@@ -179,183 +239,6 @@ Optional parameters:
   -host <filename>, --hostfile <filename>
                         Path to cluster hostfile if needed for mpi process
 ```
-
-## 2/ Parameter file
-
-DGINN uses a parameter file to pass all the necessary arguments for launching the pipeline.
-Two example files are provided in the examples directory:
-1. one performing steps 1-7 (see Overview) from the CDS of the gene of interest to the detection of recombination (parameters.txt)
-2. one performing step 8 for the detection of positive selection (parameters_possel.txt)
-
-This is the recommended usage for DGINN, so that analyses for positive selection can be parallelized over all alignments instead of doing them sequentially.
-
-Please be aware that fasta sequence name **and** queryName must follow
-the format speSpe_GENE_Id (ex: homSap_MX1_CCDS13673,
-macMul_APOBEC3G_NM_001198693).
-
-```
-# Path or list of paths (absolute or relative) to the files needed to start the pipeline
-# Please refer to **3/ Entry steps** for necessary files
-infile:
-
-# Output directory for all results
-# Automatically created if not specified
-outdir:
-
-# Path to a file where progress of the pipeline will be logged
-# Automatically created if not specified
-logfile:
-
-##################################
-### STEP
-##################################
-
-# Step at which to enter the pipeline (default: blast)
-# Please refer to 3/ Entry steps for names and necessary files
-step: 
-
-##################################
-### BLAST
-##################################
-
-# NCBI database on which the blast is to be performed (ex: nr)
-# Future implementations will include the possibility to perform the search on local databases
-blastdb:
-
-# E-value for Blast (default: 10⁻⁴)
-evalue:
-
-# Coverage for Blast (default: 50)
-mincov:
-
-# Percentage of identity for Blast (default: 70)
-percID:
-
-#################################
-### QUERY
-#################################
-
-# Option for eliminating overly long sequences (default: cutoff(3))
-# IQR or cutoff, factor can be put after in parenthesis
-# cutoff will delete all sequences longer than (factor) times the median of the distribution
-# IQR will delete all sequences longer than the third quartile plus (factor) times the InterQuartile Range
-maxLen:
-
-# Can be used to limit the search on NCBI databases to certain set of species, to exclude others, etc.
-# https://www.ncbi.nlm.nih.gov/books/NBK3837/#EntrezHelp.Entrez_Searching_Options
-entryQuery:
-
-# Identifier of the reference sequence for steps outside of blast and positiveSelection
-queryName:
-
-# Determines if Blast is performed against NCBI databases (default: True)
-remote:
-
-# NCBI API key to increase Blast speed, obtainable from the NCBI
-APIKey:
-
-##################################################
-###### TREE
-##################################################
-
-# Options for running PhyML
-# Input the command in the same way you would to run PhyML yourself in the following manner phyml -i ALN [the rest of your options]
-# For example, to run PhyML with a GTR model with 100 bootstraps, the option would be phymlOpt:phyml -i ALN -m GTR -b 100
-# Please be aware that PhyML will run even if your options are wrong, but with its own default parameters
-phymlOpt:
-
-
-##################################################
-###### ORTHOLOGS
-##################################################
-
-# Path to the species tree for the detection of duplication events and ortholog group assignment
-# Species names must be formated as speSpe or speSpeSpe (ex: homSap, gorGorGor)
-sptree:
-
-# Option for the identification of duplication events (default: False)
-duplication:
-
-###############################################
-##### CLEANING
-###############################################
-
-# Option for Long Branch separation (default: cutoff(50))
-# IQR or cutoff, factor can be put after in parenthesis (ex: cutoff(50))
-# EXPERIMENTAL
-LBopt:
-
-# Minimum number of species for assignment to an ortholog group (default: 8)
-nbspecies:
-
-##################################################
-###### RECOMBINATION
-##################################################
-
-# Option for the detection of recombination events (default: False)
-recombination:
-
-##################################################
-###### POSITIVE SELECTION
-##################################################
-
-# Option for the detection of positive selection (default: False)
-positiveSelection:
-
-# P-value for Hyphy methods (BUSTED/MEME) (Pond *et al.*, 2005) (default: 0.1)
-hyphySeuil:
-
-# Option for using the Hyphy method BUSTED (Murrel *et al.*, 2015) (default: False)
-busted:
-
-# Option for using the Hyphy method BUSTED (Murrel *et al.*, 2015) (default: False)
-meme:
-
-# Models to be computed by BIO++ (Gueguen *et al.*, 2013) and/or PAML (Yang, 2007)
-# Implemented models: M0, M1, M2, M7, M8, M8a, DFP07, DFP07_0
-# Must be comma separated (ex: M0,M1,M2)
-#
-# Rate distribution are either Constant ou Gamma(n=4)
-# Default is Gamma, and explicit rate distribution are available through "_C" or "_G" suffixes to model names (ex: M0_C, M0_G)
-models: M0, M1, M2
-
-# Option for using paml for the detection of sites under positive selection (default: False)
-paml: 
-
-# Option for using BIO++ for the detection of sites under positive selection
-# If True, parameter file will be automatically generated
-# Can be used to indicate the path to a BIO++ parameter file
-bppml:
-
-# Same as previously, but for extracting results from the results computed from bppml
-mixedlikelihood:
-
-# Option for using BIO++ for the detection of branches under positive selection
-# If True, parameter file will be automatically generated
-# Positive selection on each is assessed through LRT M2 vs M1 model in bio++.
-# Parameters different from omega are shared between all branches.
-opb:
-```
-
-## 3/ Entry steps
-
-| Step              | Necessary file\(s\)                          | Format                     |
-|-------------------|----------------------------------------------|----------------------------|
-| blast             | CDS of the gene of interest                  | Fasta                      |
-| accessions        | List of blast results                        | NCBI tabulated format (tsv)|
-| fasta             | List of accession identifiers \(one/line\)   | Txt                        |
-| orf               | mRNA sequences of orthologs                  | Fasta                      |
-| alignment         | CDS sequences of orthologs                   | Fasta                      |
-| tree              | \(codon\) alignment of orthologs             | Fasta                      |
-| duplication       | \(codon\) alignment, gene tree               | Fasta, newick              |
-| recombination     | \(codon\) alignment                          | Fasta                      |
-| positiveSelection | codon alignment, gene tree                   | Fasta, gene tree           |
-
-File order must be respected and follow the one indicated in this table.
-
-
-Though codon alignments are not technically necessary for the phyml, duplication and recombination steps, they are for positiveSelection.
-Thus, starting at steps upstream of positiveSelection with non codon alignments will probably lead to failure at the positiveSelection step.
 
 ## 4/ Positive selection
 
