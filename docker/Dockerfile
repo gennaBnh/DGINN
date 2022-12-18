@@ -117,6 +117,12 @@ FROM base as mafft
 #No WORKDIR /opt  because not used for apt-get
 RUN apt-get clean  && apt-get update && apt-get install -y mafft
 
+#################
+## Install macse
+FROM base as java
+#WORKDIR /opt/DGINN/workflow/
+RUN apt-get clean && apt-get update -y && apt-get install -y default-jdk
+#RUN wget https://bioweb.supagro.inra.fr/macse/releases/macse_v2.06.jar
 
 ####################
 ## Install all
@@ -143,15 +149,6 @@ RUN git clone https://github.com/gennaBnh/DGINN && cd DGINN
 ENV PATH /opt/DGINN/:$PATH
 ENV PYTHONPATH /opt/DGINN/:$PYTHONPATH
 
-## Install macse
-FROM base as java
-WORKDIR /opt/DGINN/workflow/
-
-RUN apt-get clean && apt-get update -y && apt-get install -y default-jdk
-#RUN wget https://bioweb.supagro.inra.fr/macse/releases/macse_v2.06.jar
-
-
-
 ## All softwares
 ENV PATH /opt/bin:$PATH
 
@@ -166,7 +163,6 @@ ENV PATH /opt/mafft/bin/:/opt/mafft/lib/:$PATH
 #ENV LD_LIBRARY_PATH /opt/local/lib:$LD_LIBRARY_PATH
 # RUN echo $PATH
 #
-
 
 COPY --from=phyml /usr/lib/phyml/bin/phyml /opt/bin/phyml
 
@@ -190,5 +186,7 @@ RUN apt-get install -y python3-biopython
 RUN apt-get update -y && \
     apt-get install -y snakemake
 
-WORKDIR /opt/DGINN/workflow/
-ENTRYPOINT [ "snakemake" ]
+#WORKDIR /opt/DGINN/workflow/
+
+ENTRYPOINT [ "Snakefile" ]
+CMD ["-c1 -p"]
