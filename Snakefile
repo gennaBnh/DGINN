@@ -8,6 +8,9 @@ validate(config, "config/config.schema.yaml")
 dir = config["data"]["o"]
 filename = [config["parameters"]["infile"]][0].split("data/")[1].split(".")[0]
 
+if config["parameters"]["step"] in ["duplication","recombination","positiveSelection"]:
+    config["parameters"]["step"] = "detection"
+    
 if config["parameters"]["positiveSelection"] :
     endfile = dir+filename+"_files_list2.txt" 
 elif config["parameters"]["recombination"]:
