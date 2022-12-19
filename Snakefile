@@ -4,6 +4,8 @@ configfile: "examples/config_exemple.json" #chemin du fichier config par défaut
 container: "docker://laugueguen/dginn"
 min_version("6.15.1")
 
+#verification du config file, s'il ne correspond pas au schéma, le pipeline ne sera pas lancé.
+#permet d'éviter l'ajout de paramètres érronés (ex: infile:200) 
 validate(config, "config/config.schema.yaml")
 
 #definition du dossier de stockage des résultats 
