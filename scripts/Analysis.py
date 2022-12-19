@@ -129,10 +129,8 @@ def runPhyML(aln, phymlOpt, geneDir):
 	"""
 	# convert to Phylip format and replace eventual "!" symbols (relic from using MACSE)
 	origin = os.getcwd()
-	os.chdir(geneDir)
 	outPhy = aln.split("/")[-1].split(".")[0]+".phylip"
 	tmp = aln.split("/")[-1].split(".")[0]+".tmp"
-	aln = aln.split("/")[-1]
 
 	logger = logging.getLogger("main.tree")
 	
