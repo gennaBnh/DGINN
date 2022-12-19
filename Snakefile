@@ -1,17 +1,18 @@
 from snakemake.utils import min_version, validate
-config_path = "examples/config_exemple.json"
-configfile: "examples/config_exemple.json"
+config_path = "examples/config_exemple.json" #chemin vers le fichier config de l'utilisateur 
+configfile: "examples/config_exemple.json" #chemin du fichier config par défaut
 container: "docker://laugueguen/dginn"
 min_version("6.15.1")
 
 validate(config, "config/config.schema.yaml")
 
+#definition du dossier de stockage des résultats 
 dir = config["data"]["o"]
-filename = [config["parameters"]["infile"]][0].split("data/")[1].split(".")[0]
 
-if config["parameters"]["step"] in ["duplication","recombination","positiveSelection"]:
-    config["parameters"]["step"] = "detection"
+#récupération du nom du infile (ex: "data/filename.fasta")
+filename = [config["parameters"]["infile"]][0].split("data/")[1].split(".")[0]
     
+#définition du dernier file à produire pour la rule detection car plusieurs fichiers de sortie possible en fonction de la dernière étape.
 if config["parameters"]["positiveSelection"] :
     endfile = dir+filename+"_files_list2.txt" 
 elif config["parameters"]["recombination"]:
@@ -20,10 +21,15 @@ elif config["parameters"]["duplication"]:
     endfile = dir+filename+"_recs2.nhx"
 else: 
     endfile = dir+filename+"_filtered2.phylip_phyml_tree.txt"
-
+    
+#règle globale permettant la définition du dernier file à produire par le pipeline. 
+#Permet de ne pas avoir à indiquer l'output final:
+#snakemake -c1 -p au lieu de snakemake -c1 -p "output_file_name"
 rule all:
     input: endfile
-
+        
+        
+#règle qui permet de lire le fichier config et détermine à partir de ce dernier le premier input du pipeline et la règle qui lui est associée. 
 rule init:
     input: 
         config = "examples/config_exemple.json"
@@ -33,6 +39,7 @@ rule init:
     shell:
         "python3 scripts/Init.py {input.config} {output.infile}"
 
+#règle qui lance le script Blast.py 
 rule blast:
     input:
         infile = dir+"blast_input_{samples}.fasta"
@@ -44,6 +51,7 @@ rule blast:
     shell:
         "python3 scripts/Blast.py {params.config} {output.tsvfile}"
 
+#règle qui lance le script Extract.py
 rule extract:
     input:
         blastres = dir+"accessions_input_{samples}.tsv" 
@@ -55,6 +63,7 @@ rule extract:
     shell:
         "python3 scripts/Extract.py {params.config} {input.blastres} {output.accns}"
 
+#règle qui lance le script fastaRes.py 
 rule fasta_res:
     input: 
         accns = dir+"fasta_input_{samples}.txt" 
@@ -66,6 +75,7 @@ rule fasta_res:
     shell:
         "python3 scripts/fastaRes.py {params.config} {input.accns} {output.seq}"
 
+#règle qui lance le script ORF.py 
 rule get_orf:
     input:
         seqfile = dir+"orf_input_{samples}.fasta" 
@@ -78,6 +88,7 @@ rule get_orf:
     shell:
         "python3 scripts/ORF.py {params.config} {output.res} {output.res_longest}"
 
+#règle qui lance l'alignement avec mafft  
 rule align_mafft:
     input:
         lgst_ORFs = dir+"align_input_{samples}.fasta"
@@ -90,7 +101,8 @@ rule align_mafft:
     run:
         shell("mafft --auto --quiet {input.lgst_ORFs} > {params.out_mafft}"),
         shell("python3 scripts/covAln.py {params.out_mafft} {output.out_covAln} {params.config}")
-
+        
+#règle qui lance le premier codon aligner choisi par l'utilisateur  
 rule first_align_codon:
     input:
         in_alcodon = dir+"{samples}_mafft.fasta" if config["parameters"]["align_nt"] else dir+"align_input_{samples}.fasta"
@@ -115,6 +127,7 @@ rule first_align_codon:
         else :
             print(f"Le paramètre codon_aligner du fichier config n'a pas été correctement rempli.\nIl doit contenir une liste d'au moins 1 élément et d'au plus 2.\nLes deux seules valeurs qu'il peut contenir sont \"macse\" ou \"prank\".\nIl contient actuellement la valeur {config['parameters']['codon_aligner']}")
 
+#règle qui lance le premier codon aligner choisi par l'utilisateur  
 rule second_align_codon:
     input:
         in_alcodon_2 = dir+"{samples}_clustiso_first.fasta" if len(config["parameters"]["codon_aligner"]) == 2 else dir+"{samples}_clustiso.fasta"
@@ -145,7 +158,8 @@ rule second_align_codon:
 
         else :
             print(f"Le paramètre codon_aligner du fichier config n'a pas été correctement rempli.\nIl doit contenir une liste d'au moins 1 élément et d'au plus 2.\nLes deux seules valeurs qu'il peut contenir sont \"macse\" ou \"prank\".\nIl contient actuellement la valeur {config['parameters']['codon_aligner']}")
-           
+  
+#règle qui lance la fonction phyMLTree du script Analysis.py 
 rule tree:
     input:
         infile = dir+"tree_input_"+filename+".fasta" 
@@ -157,6 +171,10 @@ rule tree:
     message: "\nStarting Tree building, writing output in file {output.phymlfile}" 
     shell:
         "python3 scripts/Analysis.py {params.config} {params.fonction} {output.phymlfile}"
+        
+#règle qui lance les étapes "duplication", "recombinaison" et "positiveSelection". Les 3 peuvent être lancés séparement ou à la suite.
+#Il était plus simple de les combiner dans une seule règle afin de ne pas avoir à déterminer les différents fichier d'entrée possible.
+#De plus, "duplication" et "positiveSelection" prennent en entrée des fichiers similaires. 
 
 rule detection:
     input:
