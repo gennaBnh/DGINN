@@ -1,6 +1,10 @@
 from snakemake.utils import min_version, validate
+
+### CONFIG FILE DEFINITION ###
 config_path = "examples/config_exemple.json" #chemin vers le fichier config de l'utilisateur 
 configfile: "examples/config_exemple.json" #chemin du fichier config par défaut
+##############################
+
 container: "docker://laugueguen/dginn"
 min_version("6.15.1")
 
@@ -129,7 +133,8 @@ rule first_align_codon:
         else :
             print(f"Le paramètre codon_aligner du fichier config n'a pas été correctement rempli.\nIl doit contenir une liste d'au moins 1 élément et d'au plus 2.\nLes deux seules valeurs qu'il peut contenir sont \"macse\" ou \"prank\".\nIl contient actuellement la valeur {config['parameters']['codon_aligner']}")
 
-#règle qui lance le premier codon aligner choisi par l'utilisateur  
+# Règle qui lance le second aligneur de codon, si il est spécifié dans le fichier config. Si un seul aligneur est spécifié, la règle renomme
+# simplement le fichier de sortie de la règle précédente pour qu'il soit pris en input par la règle suivante.
 rule second_align_codon:
     input:
         in_alcodon_2 = dir+"{samples}_clustiso_first.fasta" if len(config["parameters"]["codon_aligner"]) == 2 else dir+"{samples}_clustiso.fasta"
