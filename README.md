@@ -53,9 +53,8 @@ sudo apt install default-sdk
 
 ## STEP 1 : Fill in the config file 
   DGINN uses a config file in a json format to pass all the necessary arguments for launching the pipeline.
-  The file is available in the config/ folder. Two example files are provided in the examples directory:
+  The file is available in the config/ folder. An example file is provided in the examples directory:
   1. one performing steps 1-7 (see Overview) from the CDS of the gene of interest to the detection of recombination (config_exemple.json)
-  2. one performing step 8 for the detection of positive selection (config_exemple_possel.json)
 
 This is the recommended usage for DGINN, so that analyses for positive selection can be parallelized over all alignments instead of doing them sequentially.
 
@@ -69,7 +68,7 @@ The parameters of the "parameters" dictionnary can be modified not the data ones
 The parameters "infile" must be filled otherwise the pipeline won't run. The infile necessary to run the pipeline depends on the step from which you would like the analysis to start. Please refer to c/ The Step parameter for names and necessary files.
 
 ### c/ The Step parameter
-DGINN realises 9 different steps. It will by default start frome the blast step but the pipeline can be start from different steps. Here's a resume on the steps available and the input files required to run them. 
+DGINN realises 9 different steps. It will by default start frome the blast step but the pipeline can be start from different steps (NB: It's for now not possible to enter from the steps duplication, recombination and positive selection). Here's a resume on the steps available and the input files required to run them.
 
 
 | Step              | Necessary file\(s\)                          | Format                     |
