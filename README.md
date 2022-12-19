@@ -121,7 +121,7 @@ snakemake -c1 -p --use-singularity
 You can replace -c1 by -cx where x is the number of cores you want the pipeline to use.
 
 ### From command line, without the Docker container :
-To start the Snakemake DGINN pipeline from the command line, you first need to install all the pipeline's dependencies : [EMBOSS:6.6](http://en.bio-soft.net/format/emboss.html), [PhyML 3.0](https://github.com/stephaneguindon/phyml), [PRANK v.170427](http://wasabiapp.org/software/prank/prank_installation/), [Treerecs v1.0](https://gitlab.inria.fr/Phylophile/Treerecs), [HYPHY 2.3](http://www.hyphy.org/installation/), [Bio++ v.3](https://github.com/BioPP)
+To start the Snakemake DGINN pipeline from the command line, you first need to install all the pipeline's dependencies : [EMBOSS:6.6](http://en.bio-soft.net/format/emboss.html), [PhyML 3.0](https://github.com/stephaneguindon/phyml), [PRANK v.170427](http://wasabiapp.org/software/prank/prank_installation/), [Treerecs v1.0](https://gitlab.inria.fr/Phylophile/Treerecs), [HYPHY 2.3](http://www.hyphy.org/installation/)
 
 To install Snakemake's python dependencies, first [install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html)
 
@@ -137,7 +137,12 @@ After modifying the config.json file, as specified above, navigate to the workfl
 ```sh
 snakemake -c1 -p
 ```
-# Overview
+
+
+
+
+
+# ORIGINAL DGINN :
 
 
 ![Diagram of DGINN main steps](https://github.com/leapicard/DGINN/blob/master/etc/pipeline_diagram.pdf)
