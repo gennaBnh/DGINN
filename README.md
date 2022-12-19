@@ -111,7 +111,7 @@ There are two lines where you need to specify the right path, here is an example
 line2: config_path = "examples/config_exemple.json"
 line3: configfile: "examples/config_exemple.json"
 ```
-
+**Note that it is also mandatory that the input files be in the data/ folder**
 ### Starting the pipeline using Snakemake :
 
 To run the Snakemake DGINN pipeline, simply type : 
