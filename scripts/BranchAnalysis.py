@@ -1,5 +1,5 @@
 import os, shlex, logging, subprocess, re
-from AnalysisFunc import cmd
+from Analysis import cmd
 from subprocess import PIPE
 from shutil import copyfile
 from SiteAnalysis import getNewParfromOptim, setIgnoreParams
